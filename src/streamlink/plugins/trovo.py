@@ -1,6 +1,7 @@
 import re
 
 from streamlink.stream import HTTPStream
+from streamlink.stream import HLSStream
 from streamlink.plugin import Plugin
 
 
@@ -15,7 +16,10 @@ class Trovo(Plugin):
     def _get_streams(self):
         res = self.session.http.get(self.url)
         for m in self.streams_re.finditer(res.text):
-            yield m.group(2), HTTPStream(self.session, m.group(1).replace('\\u002F', '/'))
+            if "liveplay.trovo.live" in m.group(1):
+                yield m.group(2), HTTPStream(self.session, m.group(1).replace('\\u002F', '/'))
+            elif "vod.trovo.live" in m.group(1):
+                yield m.group(2), HLSStream(self.session, m.group(1).replace('\\u002F', '/'))
 
 
 __plugin__ = Trovo
